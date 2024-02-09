@@ -1,0 +1,1 @@
+Gabut bjir mari mengisi hari - hari dengan mainan js bersama ide yang tak terbatas bjir lah kacawww
