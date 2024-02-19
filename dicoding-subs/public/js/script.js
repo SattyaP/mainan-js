@@ -1,4 +1,5 @@
-// CONFIRMATION ENV HANYA SAYA GUNAKAN UNTUK TUGAS SAJA PRODUCTION SAYA TIDAK MENGGUNAKAN CARA SEPERTI INI TERIMAKASIH
+// CONFIRMATION ENV HANYA SAYA GUNAKAN UNTUK TUGAS SAJA. PRODUCTION SAYA TIDAK MENGGUNAKAN CARA SEPERTI INI TERIMAKASIH, KETIKA STATUS TUGAS TELAH SUKSES MAKA APP TOKEN SAYA HAPUS.
+
 const env = {
     clientId: 'fd36b49bb92d49fca774a9b38eb19ed8',
     clientSecret: 'b5b0142c00194220b4d65873a38e30a7',
@@ -55,7 +56,7 @@ class Spotify {
     }
 
     async getPlaylist(accessToken) {
-        const param = 'v1/playlists/0Uwj8lEBj65wAMYkLMUj4B'
+        const param = `v1/users/${env.userId}/playlists`
         return await this.fetchData(param, accessToken);
     }
 
@@ -81,20 +82,33 @@ async function renderArtis(accessToken) {
     const artists = await spotify.favoriteArtists(accessToken);
     const opening = document.querySelector('.main-opening')
     const based = (name, src, desc) => `<article>
-    <img src="${src}" alt="${name}-picture">
+    <img class="img-artis" style="border-radius: 8px;" src="${src}" alt="${name}-picture">
     <h5>${name}</h5>
     <p>Genres : ${desc}</p>
     </article>`
-    const openingContent = artists.map(data => based(data.name, data.images[2].url, data.genres)).join('');
-    opening.innerHTML = openingContent;
+    opening.innerHTML = artists.map(data => based(data.name, data.images[2].url, data.genres)).join('');
+}
+
+async function renderAside(accessToken) {
+    const profile = await spotify.getProfile(accessToken, env);
+    const imgProfile = document.getElementById('img-profile')
+    imgProfile.src = profile.images[1].url
+    imgProfile.setAttribute('alt', `${profile.display_name.replace('.','')}-pict`)
+}
+
+async function renderPlaylists(accessToken) {
+    const playlists = await spotify.getPlaylist(accessToken);
+    document.getElementById('playlist').innerHTML = playlists.items.map(e => `<a target="_blank" style="text-decoration: none;" href="${e.external_urls.spotify}" class="card-playlist">
+    <img class="img-playlist" src="${e.images[0].url}" alt="${e.name}-playlist">
+    <h5>${e.name}</h5>
+    </a>`).join('')
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Update year footer
-    // document.getElementById("year").innerHTML = new Date().getFullYear();
-    
+    document.getElementById("year").innerHTML = new Date().getFullYear();
     const accessToken = await spotify.getAccessToken(env);
     await renderProfile(accessToken)
     await renderArtis(accessToken)
-
+    await renderAside(accessToken)
+    await renderPlaylists(accessToken)
 })
